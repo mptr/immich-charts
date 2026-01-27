@@ -21,6 +21,9 @@ controllers:
           {{- if .Values.immich.configuration }}
           IMMICH_CONFIG_FILE: /config/immich-config.yaml
           {{- end }}
+          {{- if .Values.microservices.enabled }}
+          IMMICH_WORKERS_EXCLUDE: microservices
+          {{- end }}
         ports:
           - name: http
             containerPort: 2283
@@ -89,8 +92,10 @@ serviceMonitor:
     endpoints:
       - port: metrics-api
         scheme: http
+{{- if not .Values.microservices.enabled}}
       - port: metrics-ms
         scheme: http
+{{- end }}
 
 persistence:
 {{- if .Values.immich.configuration }}
