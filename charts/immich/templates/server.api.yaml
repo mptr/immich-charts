@@ -1,27 +1,28 @@
 {{- define "immich.server.api" -}}
 controllers:
-  main: # TODO Dynamic name from inputs
+  {{ .name }}:
     type: deployment
     strategy: RollingUpdate
     containers:
       main:
         env:
-          {{ if .Values.immich.metrics.enabled }}
+          {{ if .root.Values.immich.metrics.enabled }}
           IMMICH_TELEMETRY_INCLUDE: all
           {{ end }}
-          {{- if .Values.immich.configuration }}
+          {{- if .root.Values.immich.configuration }}
           IMMICH_CONFIG_FILE: /config/immich-config.yaml
           {{- end }}
           IMMICH_WORKERS_INCLUDE: api
         ports:
-          - name: http
+          http:
+            name: http
             containerPort: 2283
             protocol: TCP
-          {{- if .Values.immich.metrics.enabled }}
-          - name: metrics-api
+          metrics-api:
+            enabled: {{ .root.Values.immich.metrics.enabled }}
+            name: metrics-api
             containerPort: 8081
             protocol: TCP
-          {{- end }}
         probes:
           liveness: &probes
             enabled: true
@@ -48,9 +49,9 @@ controllers:
               failureThreshold: 30
 
 service:
-  main:
+  {{ .name }}:
     enabled: true
-    controller: main
+    controller: {{ .name }}
     primary: true
     type: ClusterIP
     ports:
@@ -61,14 +62,14 @@ service:
         targetPort: http
         protocol: HTTP
       metrics-api:
-        enabled: {{ .Values.immich.metrics.enabled }}
+        enabled: {{ .root.Values.immich.metrics.enabled }}
         port: 8081
         targetPort: metrics-api
         protocol: HTTP
 
 serviceMonitor:
-  main:
-    enabled: {{ .Values.immich.metrics.enabled }}
+  {{ .name }}:
+    enabled: {{ .root.Values.immich.metrics.enabled }}
     endpoints:
       - port: metrics-api
         scheme: http

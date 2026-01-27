@@ -1,43 +1,43 @@
 {{- define "immich.server.microservices" -}}
 controllers:
-  main: # TODO Dynamic name from inputs
+  {{ .name }}: # TODO Dynamic name from inputs
     type: deployment
     strategy: RollingUpdate
     containers:
       main:
         env:
-          {{ if .Values.immich.metrics.enabled }} # TODO available in template?
+          {{ if .root.Values.immich.metrics.enabled }}
           IMMICH_TELEMETRY_INCLUDE: all
           {{ end }}
-          {{- if .Values.immich.configuration }}
+          {{- if .root.Values.immich.configuration }}
           IMMICH_CONFIG_FILE: /config/immich-config.yaml
           {{- end }}
           IMMICH_WORKERS_INCLUDE: microservices
         ports:
-          {{- if .Values.immich.metrics.enabled }}
-          - name: metrics-ms
+          metrics-ms:
+            enabled: {{ .root.Values.immich.metrics.enabled }}
+            name: metrics-ms
             containerPort: 8082
             protocol: TCP
-          {{- end }}
-        probes: {} # TODO Add probes for microservices, What endpoints to use?
+        {{/* TODO Add probes for microservices container */}}
+        probes: {}
 
 service:
-  main:
+  {{ .name }}:
     enabled: true
     controller: main
     primary: true
     type: ClusterIP
     ports:
       metrics-ms:
-        enabled: {{ .Values.immich.metrics.enabled }}
+        enabled: {{ .root.Values.immich.metrics.enabled }}
         port: 8082
         targetPort: metrics-ms
         protocol: HTTP
 
-
 serviceMonitor:
-  main:
-    enabled: {{ .Values.immich.metrics.enabled }}
+  {{ .name }}:
+    enabled: {{ .root.Values.immich.metrics.enabled }}
     endpoints:
       - port: metrics-ms
         scheme: http

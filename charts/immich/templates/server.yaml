@@ -8,96 +8,9 @@ defaultPodOptions:
     checksum/config: {{ .Values.immich.configuration | toYaml | sha256sum }}
 {{- end }}
 
-# TODO: Render immich.server.api or immich.server.microservices based on values
+{{/* TODO: Render immich.server.api or immich.server.microservices based on values */}}
 
-# controllers:
-#   main:
-#     type: deployment
-#     strategy: RollingUpdate
-#     containers:
-#       main:
-#         env:
-#           {{ if .Values.immich.metrics.enabled }}
-#           IMMICH_TELEMETRY_INCLUDE: all
-#           {{ end }}
-#           {{- if .Values.immich.configuration }}
-#           IMMICH_CONFIG_FILE: /config/immich-config.yaml
-#           {{- end }}
-#           {{- if .Values.microservices.enabled }}
-#           IMMICH_WORKERS_EXCLUDE: microservices
-#           {{- end }}
-#         ports:
-#           - name: http
-#             containerPort: 2283
-#             protocol: TCP
-#           {{- if .Values.immich.metrics.enabled }}
-#           - name: metrics-api
-#             containerPort: 8081
-#             protocol: TCP
-#           - name: metrics-ms
-#             containerPort: 8082
-#             protocol: TCP
-#           {{- end }}
-#         probes:
-#           liveness: &probes
-#             enabled: true
-#             custom: true
-#             spec:
-#               httpGet:
-#                 path: /api/server/ping
-#                 port: http
-#               initialDelaySeconds: 0
-#               periodSeconds: 10
-#               timeoutSeconds: 1
-#               failureThreshold: 3
-#           readiness: *probes
-#           startup:
-#             enabled: true
-#             custom: true
-#             spec:
-#               httpGet:
-#                 path: /api/server/ping
-#                 port: http
-#               initialDelaySeconds: 0
-#               periodSeconds: 10
-#               timeoutSeconds: 1
-#               failureThreshold: 30
-
-# service:
-#   main:
-#     enabled: true
-#     controller: main
-#     primary: true
-#     type: ClusterIP
-#     ports:
-#       http:
-#         enabled: true
-#         primary: true
-#         port: 2283
-#         targetPort: http
-#         protocol: HTTP
-#       metrics-api:
-#         enabled: {{ .Values.immich.metrics.enabled }}
-#         port: 8081
-#         targetPort: metrics-api
-#         protocol: HTTP
-#       metrics-ms:
-#         enabled: {{ .Values.immich.metrics.enabled }}
-#         port: 8082
-#         targetPort: metrics-ms
-#         protocol: HTTP
-
-
-# serviceMonitor:
-#   main:
-#     enabled: {{ .Values.immich.metrics.enabled }}
-#     endpoints:
-#       - port: metrics-api
-#         scheme: http
-# {{- if not .Values.microservices.enabled}}
-#       - port: metrics-ms
-#         scheme: http
-# {{- end }}
+{{- include "immich.server.combined" (dict "root" . "name" "my-immich-instance") }}
 
 persistence:
 {{- if .Values.immich.configuration }}

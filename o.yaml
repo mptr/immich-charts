@@ -1,0 +1,27 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: release-name-server
+  labels:
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: server
+    app.kubernetes.io/version: v2.0.0
+    helm.sh/chart: immich-0.10.3
+  namespace: default
+spec:
+  jobLabel: "release-name-server"
+  namespaceSelector:
+    matchNames:
+      - default
+  selector:
+    matchLabels:
+      app.kubernetes.io/service: release-name-server
+      app.kubernetes.io/name: server
+      app.kubernetes.io/instance: release-name
+  endpoints:
+    metrics-api:
+      scheme: http
+    metrics-ms:
+      scheme: http

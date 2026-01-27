@@ -1,0 +1,23 @@
+{{- define "immich.server.combined.overrides" -}}
+controllers:
+  {{ .name }}:
+    containers:
+      main:
+        env:
+          IMMICH_WORKERS_INCLUDE: ""
+{{- end -}}
+
+{{- define "immich.server.combined" -}}
+
+{{/* compose the full server configuration by including/merging api and microservices */}}
+{{- $overrides := include "immich.server.combined.overrides" (dict "root" .root "name" .name) | fromYaml -}}
+{{- $api := include "immich.server.api" (dict "root" .root "name" .name) | fromYaml -}}
+{{- $server := include "immich.server.microservices" (dict "root" .root "name" .name) | fromYaml -}}
+
+{{/* serviceMonitor endpoints must be an array which has to be concatenated */}}
+{{- $serviceMonitorEndpoints := concat (index $api.serviceMonitor .name).endpoints (index $server.serviceMonitor .name).endpoints -}}
+{{- $serviceMonitorOverrides := dict "serviceMonitor" (dict .name (dict "endpoints" $serviceMonitorEndpoints)) -}}
+
+{{- merge $overrides $serviceMonitorOverrides $api $server | toYaml }}
+
+{{- end -}}
