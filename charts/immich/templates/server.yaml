@@ -15,6 +15,7 @@ controllers:
     containers:
       main:
         env:
+          IMMICH_WORKERS_INCLUDE: api
           {{ if .Values.immich.metrics.enabled }}
           IMMICH_TELEMETRY_INCLUDE: all
           {{ end }}
