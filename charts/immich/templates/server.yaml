@@ -2,15 +2,30 @@
 global:
   nameOverride: server
 
-{{- if .Values.immich.configuration }}
+{{ if .Values.immich.configuration }}
 defaultPodOptions:
   annotations:
     checksum/config: {{ .Values.immich.configuration | toYaml | sha256sum }}
 {{- end }}
 
-{{/* TODO: Render immich.server.api or immich.server.microservices based on values */}}
+{{- $result := dict -}}
 
-{{- include "immich.server.combined" (dict "root" . "name" "my-immich-instance") }}
+{{- if .Values.server.enabled -}}
+  {{- $server := include "immich.server.combined" (dict "root" . "name" "main") | fromYaml -}}
+  {{- $result = mustMergeOverwrite $result $server -}}
+{{- end -}}
+
+{{- if .Values.api.enabled -}}
+  {{- $api := include "immich.server.api" (dict "root" . "name" "api") | fromYaml -}}
+  {{- $result = mustMergeOverwrite $result $api -}}
+{{- end -}}
+
+{{- if .Values.microservices.enabled -}}
+  {{- $ms := include "immich.server.microservices" (dict "root" . "name" "microservices") | fromYaml -}}
+  {{- $result = mustMergeOverwrite $result $ms -}}
+{{- end -}}
+
+{{- $result | toYaml }}
 
 persistence:
 {{- if .Values.immich.configuration }}

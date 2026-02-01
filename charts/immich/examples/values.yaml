@@ -66,14 +66,14 @@ valkey:
 server:
   enabled: true
   controllers:
-    my-immich-instance:
+    main:
       containers:
         main:
           image:
             repository: ghcr.io/immich-app/immich-server
             pullPolicy: IfNotPresent
   ingress:
-    my-immich-instance:
+    main:
       enabled: false
       annotations:
         # proxy-body-size is set to 0 to remove the body limit on file uploads
@@ -87,10 +87,13 @@ server:
       tls: []
 
 microservices:
-  # setting this will split api and microservices workers, by disabling
-  # microservices in the main server and launching separate deployment for
-  # microservices
-  enabled: false
+  enabled: true
+  image:
+    repository: ghcr.io/immich-app/immich-server
+    pullPolicy: IfNotPresent
+
+api:
+  enabled: true
   image:
     repository: ghcr.io/immich-app/immich-server
     pullPolicy: IfNotPresent
