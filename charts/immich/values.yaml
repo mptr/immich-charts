@@ -97,6 +97,12 @@ server:
                 identifier: main
       tls: []
 
+microservices:
+  enabled: true
+  image:
+    repository: ghcr.io/immich-app/immich-server
+    pullPolicy: IfNotPresent
+
 machine-learning:
   enabled: true
   controllers:
