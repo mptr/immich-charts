@@ -30,9 +30,6 @@ controllers:
           - name: metrics-api
             containerPort: 8081
             protocol: TCP
-          - name: metrics-ms
-            containerPort: 8082
-            protocol: TCP
           {{- end }}
         probes:
           liveness: &probes
@@ -77,11 +74,6 @@ service:
         port: 8081
         targetPort: metrics-api
         protocol: HTTP
-      metrics-ms:
-        enabled: {{ .Values.immich.metrics.enabled }}
-        port: 8082
-        targetPort: metrics-ms
-        protocol: HTTP
 
 
 serviceMonitor:
@@ -89,8 +81,6 @@ serviceMonitor:
     enabled: {{ .Values.immich.metrics.enabled }}
     endpoints:
       - port: metrics-api
-        scheme: http
-      - port: metrics-ms
         scheme: http
 
 persistence:
